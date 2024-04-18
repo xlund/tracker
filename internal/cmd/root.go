@@ -20,7 +20,7 @@ func Exectue(ctx context.Context) int {
 	db, err := cmdutil.NewDatabasePool(ctx, 16)
 
 	if err != nil {
-		fmt.Sprintf("Unable to connect to database: %v", err)
+		println(fmt.Sprintf("Unable to connect to database: %v", err))
 		return 1
 	}
 	defer db.Close()

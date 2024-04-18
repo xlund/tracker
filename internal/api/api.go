@@ -39,6 +39,7 @@ func (a *api) Routes() *http.ServeMux {
 	r := http.NewServeMux()
 
 	r.HandleFunc("GET /v1/health", a.healthCheckHandler)
+	r.HandleFunc("POST /users/new", a.createUserHandler)
 
 	return r
 }

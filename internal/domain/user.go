@@ -8,7 +8,7 @@ import (
 )
 
 type User struct {
-	ID       int
+	ID       string
 	Username string
 
 	CreatedAt string
@@ -22,7 +22,7 @@ func (u *User) NormalizedName() string {
 func (u *User) Validate() error {
 	return validation.ValidateStruct(u,
 		validation.Field(&u.Username, validation.Required, validation.Length(3, 32)),
-		validation.Field(&u.Name, validation.Required),
+		validation.Field(&u.Name, validation.Required, validation.Length(3, 0)),
 	)
 }
 
