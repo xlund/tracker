@@ -3,7 +3,8 @@ package domain
 import (
 	"context"
 	"fmt"
-	"time"
+
+	validation "github.com/go-ozzo/ozzo-validation/v4"
 )
 
 var (
@@ -11,29 +12,52 @@ var (
 )
 
 type Game struct {
-	ID          int
-	WhitePlayer User
-	BlackPlayer User
-	TimeControl TimeControl
-	Winner      string
-	Result      string
-	CreatedAt   string
-	Name        string
+	ID        string
+	Players   GamePlayers
+	Clock     GameClock
+	Source    string
+	Status    string
+	Variant   string
+	Winner    string
+	CreatedAt string
 }
 
-type TimeControl struct {
-	Start     time.Duration
-	Increment time.Duration
+func (g *Game) Validate() error {
+	return validation.ValidateStruct(g,
+		validation.Field(&g.Players, validation.Required),
+		validation.Field(&g.Clock, validation.Required),
+		validation.Field(&g.Source, validation.Required),
+		validation.Field(&g.Status, validation.Required),
+		validation.Field(&g.Variant, validation.Required),
+	)
 }
 
-func (t *TimeControl) Readable() string {
-	return fmt.Sprintf("%d|%d", t.Start, t.Increment)
+type GamePlayers struct {
+	ID    int
+	White User
+	Black User
+}
+
+type GameClock struct {
+	Initial   int
+	Increment int
+}
+
+func (c *GameClock) Readable() string {
+	var s string
+	s = fmt.Sprintf("%d|%d", c.Initial, c.Increment)
+	if c.Initial > 60 {
+		s = fmt.Sprintf("%d:%02d|%d", c.Initial/60, c.Initial%60, c.Increment)
+	}
+	if c.Initial > 60*60 {
+		s = fmt.Sprintf("%d:%02d:%02d|%d", c.Initial/60/60, c.Initial/60%60, c.Initial%60, c.Increment)
+	}
+	return s
 }
 
 type GameRepository interface {
-	GetById(context.Context, int) (User, error)
-	GetByUsername(context.Context, string) (User, error)
+	GetById(context.Context, int) (Game, error)
 
-	CreateOrUpdate(context.Context, *User) error
-	Delete(context.Context, int) error
+	CreateOrUpdate(context.Context, *Game) error
+	Delete(context.Context, string) error
 }

@@ -14,17 +14,21 @@ type api struct {
 	httpClient *http.Client
 
 	userRepo domain.UserRepository
+	gameRepo domain.GameRepository
 }
 
 func NewApi(ctx context.Context, pool *pgxpool.Pool) *api {
 
 	userRepo := repository.NewPostgresUser(pool)
 
+	gameRepo := repository.NewPostgresGame(pool)
+
 	client := &http.Client{}
 	return &api{
 		httpClient: client,
 
 		userRepo: userRepo,
+		gameRepo: gameRepo,
 	}
 }
 
@@ -40,6 +44,7 @@ func (a *api) Routes() *http.ServeMux {
 
 	r.HandleFunc("GET /v1/health", a.healthCheckHandler)
 	r.HandleFunc("POST /users/new", a.createUserHandler)
+	r.HandleFunc("POST /games/new", a.createGameHandler)
 
 	return r
 }

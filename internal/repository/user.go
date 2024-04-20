@@ -80,7 +80,7 @@ func (r *postgresUserRepository) CreateOrUpdate(ctx context.Context, u *domain.U
 	return r.conn.QueryRow(ctx, query, u.ID, u.Username, u.Name).Scan(&u.ID)
 }
 
-func (r *postgresUserRepository) Delete(ctx context.Context, id int) error {
+func (r *postgresUserRepository) Delete(ctx context.Context, id string) error {
 	query := `DELETE FROM users WHERE id = $1`
 	_, err := r.conn.Exec(ctx, query, id)
 	return err

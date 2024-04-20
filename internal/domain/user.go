@@ -31,5 +31,5 @@ type UserRepository interface {
 	GetByUsername(context.Context, string) (User, error)
 
 	CreateOrUpdate(context.Context, *User) error
-	Delete(context.Context, int) error
+	Delete(context.Context, string) error
 }
