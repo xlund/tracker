@@ -9,9 +9,7 @@ templ User(user domain.User) {
 		<td>{ user.Username }</td>
 		<td class="tool-bar">
 			<a
-				hx-get={ string(templ.URL(fmt.Sprintf(
-                            "/users/%s",
-                            user.ID))) }
+				href={ templ.URL(fmt.Sprintf("/users/%s", user.ID)) }
 			>View</a>
 			<button
 				class="bad color bg border"

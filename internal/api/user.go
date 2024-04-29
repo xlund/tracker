@@ -66,13 +66,13 @@ func (a *api) getUserHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithCancel(r.Context())
 	defer cancel()
 	id := r.PathValue("id")
-	user, err := a.userRepo.GetById(ctx, id)
-	games := []domain.Game{}
+	user, games, err := a.userRepo.GetByIdWithGames(ctx, id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Default().Println(err.Error())
 		return
 	}
+	log.Default().Println(games)
 	c := layout.Base("User", page.UserWithGames(user, games))
 	c.Render(ctx, w)
 }

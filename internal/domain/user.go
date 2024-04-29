@@ -31,6 +31,8 @@ type UserRepository interface {
 	GetById(context.Context, string) (User, error)
 	GetByUsername(context.Context, string) (User, error)
 
+	GetByIdWithGames(context.Context, string) (User, []Game, error)
+
 	CreateOrUpdate(context.Context, *User) error
 	Delete(context.Context, string) error
 }

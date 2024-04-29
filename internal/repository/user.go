@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"log"
 
 	"github.com/xlund/tracker/internal/domain"
 )
@@ -34,8 +35,11 @@ func (r *postgresUserRepository) fetch(ctx context.Context, query string, args .
 
 func (r *postgresUserRepository) GetById(ctx context.Context, id string) (domain.User, error) {
 	query := `
-		SELECT id, username, name
-		FROM users
+		SELECT u.id, u.username, u.name, g.id, g.white, g.black, wp.username, bp.username
+		FROM users u
+		LEFT JOIN game_Users g ON u.id = g.white OR u.id = g.black
+		LEFT JOIN users wp ON g.white = wp.id
+		LEFT JOIN users bp ON g.black = bp.id
 		WHERE id = $1`
 
 	uu, err := r.fetch(ctx, query, id)
@@ -46,7 +50,56 @@ func (r *postgresUserRepository) GetById(ctx context.Context, id string) (domain
 		return domain.User{}, domain.ErrNotFound
 	}
 
+	log.Default().Println(uu[0])
+
 	return uu[0], nil
+
+}
+
+func (r *postgresUserRepository) GetByIdWithGames(ctx context.Context, id string) (domain.User, []domain.Game, error) {
+	query := `
+	SELECT
+    u.id AS user_id,
+    u.username AS user_username,
+    u.name AS user_name,
+    COALESCE(g.id, 0) AS game_id,
+	COALESCE(g.white, 'removed') AS game_white_user_id,
+	COALESCE(g.black, 'removed') AS game_black_user_id,
+	COALESCE(wp.username, 'removed') AS white_player_username,
+	COALESCE(bp.username, 'removed') AS black_player_username
+FROM
+    users u
+LEFT JOIN
+    game_users g ON u.id = g.white OR u.id = g.black
+LEFT JOIN
+    users wp ON g.white = wp.id
+LEFT JOIN
+    users bp ON g.black = bp.id
+WHERE
+    u.id = $1;`
+
+	rows, err := r.conn.Query(ctx, query, id)
+	if err != nil {
+		return domain.User{}, []domain.Game{}, err
+	}
+	defer rows.Close()
+
+	var uu []domain.User
+	var gg []domain.Game
+	for rows.Next() {
+		var u domain.User
+		var g domain.Game
+		if err := rows.Scan(&u.ID, &u.Username, &u.Name, &g.ID, &g.Users.White.ID, &g.Users.Black.ID, &g.Users.White.Username, &g.Users.Black.Username); err != nil {
+			return domain.User{}, []domain.Game{}, err
+		}
+		uu = append(uu, u)
+		gg = append(gg, g)
+	}
+	if len(uu) == 0 {
+		return domain.User{}, []domain.Game{}, domain.ErrNotFound
+	}
+
+	return uu[0], gg, nil
 
 }
 
