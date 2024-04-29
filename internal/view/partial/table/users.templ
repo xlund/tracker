@@ -9,10 +9,9 @@ templ Users(users []domain.User) {
 			<tr>
 				<th>Name</th>
 				<th>Username</th>
-				<th>Actions</th>
 			</tr>
 		</thead>
-		<tbody id="users-table-data" hx-confirm="Are you sure?" hx-target="closest tr">
+		<tbody id="users-table-data">
 			for _, user := range users {
 				@item.User(user)
 			}

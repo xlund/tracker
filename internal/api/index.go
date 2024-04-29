@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"log"
 	"net/http"
 
 	"github.com/xlund/tracker/internal/view/layout"
@@ -15,7 +16,7 @@ func (a *api) getIndexHandler(w http.ResponseWriter, r *http.Request) {
 	users, err := a.userRepo.GetAll(ctx)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		println(err.Error())
+		log.Default().Println(err.Error())
 		return
 	}
 	c := layout.Base("Chess Tournament Tracker", page.Index(users))

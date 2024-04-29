@@ -26,7 +26,7 @@ func Users(users []domain.User) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<table class=\"users-table\"><thead><tr><th>Name</th><th>Username</th><th>Actions</th></tr></thead> <tbody id=\"users-table-data\" hx-confirm=\"Are you sure?\" hx-target=\"closest tr\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<table class=\"users-table\"><thead><tr><th>Name</th><th>Username</th></tr></thead> <tbody id=\"users-table-data\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

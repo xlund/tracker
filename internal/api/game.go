@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"log"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -42,7 +43,7 @@ func (a *api) createGameHandler(w http.ResponseWriter, r *http.Request) {
 	err := a.gameRepo.CreateOrUpdate(ctx, &game)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		println(err.Error())
+		log.Default().Println(err.Error())
 		return
 	}
 
@@ -55,14 +56,14 @@ func (a *api) getGamesHandler(w http.ResponseWriter, r *http.Request) {
 	games, err := a.gameRepo.GetAll(ctx)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		println(err.Error())
+		log.Default().Println(err.Error())
 		return
 	}
 
 	users, err := a.userRepo.GetAll(ctx)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		println(err.Error())
+		log.Default().Println(err.Error())
 		return
 	}
 

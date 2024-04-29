@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"log"
 
 	"github.com/xlund/tracker/internal/domain"
 )
@@ -32,6 +33,24 @@ func (r *postgresGameRepository) fetch(ctx context.Context, query string, args .
 	return gg, nil
 }
 
+func (r *postgresGameRepository) fetchWithUsernames(ctx context.Context, query string, args ...interface{}) ([]domain.Game, error) {
+	rows, err := r.conn.Query(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var gg []domain.Game
+	for rows.Next() {
+		var g domain.Game
+		if err := rows.Scan(&g.ID, &g.Users.White.ID, &g.Users.White.Username, &g.Users.White.Name, &g.Users.Black.ID, &g.Users.Black.Username, &g.Users.Black.Name); err != nil {
+			return nil, err
+		}
+		gg = append(gg, g)
+	}
+	return gg, nil
+}
+
 func (r *postgresGameRepository) GetById(ctx context.Context, id int) (domain.Game, error) {
 	query := `
 		SELECT id
@@ -51,15 +70,32 @@ func (r *postgresGameRepository) GetById(ctx context.Context, id int) (domain.Ga
 }
 
 func (r *postgresGameRepository) GetAll(ctx context.Context) ([]domain.Game, error) {
+
 	query := `
 	SELECT g.id, g.Users,  g.status,  g.winner,
-	gp.white AS white_player, gp.black AS black_player , wp.username AS white_username, bp.username AS black_username, wp.name AS white_name, bp.name AS black_name
+	COALESCE(gp.white , 'removed') AS white_player, COALESCE(gp.black, 'removed') AS black_player , COALESCE(wp.username, 'removed') AS white_username, COALESCE(bp.username, 'removed') AS black_username, COALESCE(wp.name, 'removed') AS white_name, COALESCE(bp.name, 'removed') AS black_name
 FROM games g
-JOIN game_Users gp ON g.Users = gp.id
-JOIN users wp ON gp.white = wp.id
-JOIN users bp ON gp.black = bp.id
+LEFT JOIN game_Users gp ON g.Users = gp.id
+LEFT JOIN users wp ON gp.white = wp.id
+LEFT JOIN users bp ON gp.black = bp.id
 		`
-	return r.fetch(ctx, query)
+	rows, err := r.conn.Query(ctx, query)
+	if err != nil {
+		log.Default().Printf("Game Repository GetAll Error: %v", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var gg []domain.Game
+	for rows.Next() {
+		var g domain.Game
+		if err := rows.Scan(&g.ID, &g.Users.ID, &g.Status, &g.Winner, &g.Users.White.ID, &g.Users.Black.ID, &g.Users.White.Username, &g.Users.Black.Username, &g.Users.White.Name, &g.Users.Black.Name); err != nil {
+			log.Default().Printf("Game Repository GetAll Error: %v", err)
+			return nil, err
+		}
+		gg = append(gg, g)
+	}
+	return gg, nil
 }
 
 func (r *postgresGameRepository) CreateOrUpdate(ctx context.Context, g *domain.Game) error {

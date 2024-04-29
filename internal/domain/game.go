@@ -15,7 +15,6 @@ type Game struct {
 	ID        string
 	Users     GameUsers
 	Clock     GameClock
-	Source    string
 	Status    string
 	Variant   string
 	Winner    string
@@ -26,7 +25,6 @@ func (g *Game) Validate() error {
 	return validation.ValidateStruct(g,
 		validation.Field(&g.Users, validation.Required),
 		validation.Field(&g.Clock, validation.Required),
-		validation.Field(&g.Source, validation.Required),
 		validation.Field(&g.Status, validation.Required),
 		validation.Field(&g.Variant, validation.Required),
 	)

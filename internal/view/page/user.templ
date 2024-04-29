@@ -4,22 +4,11 @@ import "github.com/xlund/tracker/internal/view/partial/table"
 import "github.com/xlund/tracker/internal/domain"
 
 templ Users(users []domain.User) {
-	<table>
-		<thead>
-			<tr>
-				<th>Username</th>
-				<th>Name</th>
-			</tr>
-		</thead>
-		<tbody id="users-table-data">
-			for _, user := range users {
-				<tr>
-					<td>{ user.Username }</td>
-					<td>{ user.Name }</td>
-				</tr>
-			}
-		</tbody>
-	</table>
+	<main>
+		<figure>
+			@table.Users(users)
+		</figure>
+	</main>
 }
 
 templ UserWithGames(user domain.User, games []domain.Game) {

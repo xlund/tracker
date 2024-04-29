@@ -26,7 +26,7 @@ func (a *api) createUserHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 
 		w.WriteHeader(http.StatusInternalServerError)
-		println(err.Error())
+		log.Default().Println(err.Error())
 		return
 	}
 
@@ -39,11 +39,11 @@ func (a *api) getUsersHandler(w http.ResponseWriter, r *http.Request) {
 	users, err := a.userRepo.GetAll(ctx)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		println(err.Error())
+		log.Default().Println(err.Error())
 		return
 	}
 
-	c := layout.Base("Users", view.Index(users))
+	c := layout.Base("Users", view.Users(users))
 	c.Render(ctx, w)
 }
 
@@ -56,7 +56,7 @@ func (a *api) deleteUserHandler(w http.ResponseWriter, r *http.Request) {
 	err := a.userRepo.Delete(ctx, id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		println(err.Error())
+		log.Default().Println(err.Error())
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -70,7 +70,7 @@ func (a *api) getUserHandler(w http.ResponseWriter, r *http.Request) {
 	games := []domain.Game{}
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		println(err.Error())
+		log.Default().Println(err.Error())
 		return
 	}
 	c := layout.Base("User", page.UserWithGames(user, games))
