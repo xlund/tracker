@@ -42,9 +42,17 @@ func (a *api) Server(port int) *http.Server {
 func (a *api) Routes() *http.ServeMux {
 	r := http.NewServeMux()
 
-	r.HandleFunc("GET /v1/health", a.healthCheckHandler)
+	fs := http.FileServer(http.Dir("../static"))
+	r.Handle("/static/", http.StripPrefix("/static/", fs))
+
+	r.HandleFunc("/", a.getIndexHandler)
+	r.HandleFunc("GET /users", a.getUsersHandler)
 	r.HandleFunc("POST /users/new", a.createUserHandler)
+	r.HandleFunc("GET /users/{id}", a.getUserHandler)
+	r.HandleFunc("DELETE /users/{id}", a.deleteUserHandler)
 	r.HandleFunc("POST /games/new", a.createGameHandler)
+	r.HandleFunc("GET /games", a.getGamesHandler)
+	r.HandleFunc("GET /v1/health", a.healthCheckHandler)
 
 	return r
 }

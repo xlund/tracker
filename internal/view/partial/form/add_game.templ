@@ -1,0 +1,81 @@
+package form
+
+import "github.com/xlund/tracker/internal/domain"
+
+templ AddGame(users []domain.User) {
+	<figure>
+		<figcaption>Create game</figcaption>
+		<form hx-post="/games/new" target="#games-table-data" hx-swap="beforeend">
+			<fieldset class="table rows">
+				<legend>Users</legend>
+				<div>
+					<label for="white">
+						White
+					</label>
+					<select name="white" id="white">
+						for _, user := range users {
+							<option value={ user.ID }>{ user.Username }</option>
+						}
+					</select>
+				</div>
+				<div>
+					<label for="black">
+						Black
+					</label>
+					<select name="black" id="black">
+						for _, user := range users {
+							<option value={ user.ID }>{ user.Username }</option>
+						}
+					</select>
+				</div>
+			</fieldset>
+			<fieldset class="table rows">
+				<legend>Game</legend>
+				<div>
+					<label for="variant">
+						Variant
+					</label>
+					<select name="variant" id="variant">
+						<option value="standard">Standard</option>
+						<option value="chess960">Chess960</option>
+					</select>
+				</div>
+				<div>
+					<label for="status">
+						Status
+					</label>
+					<select name="status" id="status">
+						<option value="created">Created</option>
+						<option value="mate">Mate</option>
+						<option value="resigned">Resigned</option>
+						<option value="stalemate">Stalemate</option>
+						<option value="timeout">Timeout</option>
+						<option value="draw">Draw</option>
+						<option value="unkown">Unknown</option>
+						<script>
+                            me().on("change", e => {
+                                if (e.target.value === "mate" || e.target.value === "resigned" ) {
+                                    me("#winner").disabled = false
+                                } else {
+                                    me("#winner").value = ""
+                                    me("#winner").disabled = true
+                                }
+                            })
+                        </script>
+					</select>
+				</div>
+				<div>
+					<label for="winner">
+						Winner
+					</label>
+					<select name="winner" id="winner" disabled>
+						<option value="">None</option>
+						<option value="white">White</option>
+						<option value="black">Black</option>
+					</select>
+				</div>
+			</fieldset>
+			<input type="submit" value="Add Game"/>
+		</form>
+	</figure>
+}

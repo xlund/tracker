@@ -1,0 +1,22 @@
+package table
+
+import "github.com/xlund/tracker/internal/view/partial/table/item"
+import "github.com/xlund/tracker/internal/domain"
+
+templ Games(games []domain.Game) {
+	<table>
+		<thead>
+			<tr>
+				<th>White Player</th>
+				<th>Black Player</th>
+				<th>Winner</th>
+				<th>Status</th>
+			</tr>
+		</thead>
+		<tbody id="games-table-data">
+			for _, game := range games {
+				@item.Game(game)
+			}
+		</tbody>
+	</table>
+}

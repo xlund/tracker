@@ -13,7 +13,7 @@ var (
 
 type Game struct {
 	ID        string
-	Players   GamePlayers
+	Users     GameUsers
 	Clock     GameClock
 	Source    string
 	Status    string
@@ -24,7 +24,7 @@ type Game struct {
 
 func (g *Game) Validate() error {
 	return validation.ValidateStruct(g,
-		validation.Field(&g.Players, validation.Required),
+		validation.Field(&g.Users, validation.Required),
 		validation.Field(&g.Clock, validation.Required),
 		validation.Field(&g.Source, validation.Required),
 		validation.Field(&g.Status, validation.Required),
@@ -32,7 +32,7 @@ func (g *Game) Validate() error {
 	)
 }
 
-type GamePlayers struct {
+type GameUsers struct {
 	ID    int
 	White User
 	Black User
@@ -57,6 +57,7 @@ func (c *GameClock) Readable() string {
 
 type GameRepository interface {
 	GetById(context.Context, int) (Game, error)
+	GetAll(context.Context) ([]Game, error)
 
 	CreateOrUpdate(context.Context, *Game) error
 	Delete(context.Context, string) error

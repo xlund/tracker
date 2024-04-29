@@ -1,0 +1,21 @@
+package table
+
+import "github.com/xlund/tracker/internal/domain"
+import "github.com/xlund/tracker/internal/view/partial/table/item"
+
+templ Users(users []domain.User) {
+	<table class="users-table">
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>Username</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tbody id="users-table-data" hx-confirm="Are you sure?" hx-target="closest tr">
+			for _, user := range users {
+				@item.User(user)
+			}
+		</tbody>
+	</table>
+}

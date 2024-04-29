@@ -4,6 +4,8 @@ go 1.22.0
 
 require github.com/mattn/go-sqlite3 v1.14.22
 
+require github.com/a-h/templ v0.2.663 // indirect
+
 require (
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible // indirect

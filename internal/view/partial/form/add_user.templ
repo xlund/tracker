@@ -1,0 +1,34 @@
+package form
+
+templ AddUser() {
+	<figure>
+		<form hx-post="/users/new" hx-target="#users-table-data" hx-swap="beforeend" class="table rows">
+			<div>
+				<label for="username">
+					Username
+				</label>
+				<input
+					id="username"
+					name="username"
+					type="text"
+					placeholder="Username"
+					required
+				/>
+			</div>
+			<div>
+				<label for="name">
+					Name
+				</label>
+				<input
+					id="name"
+					name="name"
+					type="text"
+					autocomplete="name"
+					placeholder="given-name"
+					required
+				/>
+			</div>
+			<input type="submit" value="Add User"/>
+		</form>
+	</figure>
+}

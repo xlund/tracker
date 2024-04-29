@@ -27,7 +27,8 @@ func (u *User) Validate() error {
 }
 
 type UserRepository interface {
-	GetById(context.Context, int) (User, error)
+	GetAll(context.Context) ([]User, error)
+	GetById(context.Context, string) (User, error)
 	GetByUsername(context.Context, string) (User, error)
 
 	CreateOrUpdate(context.Context, *User) error

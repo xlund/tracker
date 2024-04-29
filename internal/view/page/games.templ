@@ -1,0 +1,18 @@
+package page
+
+import "github.com/xlund/tracker/internal/domain"
+import "github.com/xlund/tracker/internal/view/partial/form"
+import "github.com/xlund/tracker/internal/view/partial/table"
+
+templ Games(games []domain.Game, users []domain.User) {
+	<div class="grid">
+		<div data-cols="1 2">
+			<main>
+				@table.Games(games)
+			</main>
+		</div>
+		<div data-cols="1 1">
+			@form.AddGame(users)
+		</div>
+	</div>
+}

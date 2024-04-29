@@ -32,7 +32,7 @@ func (r *postgresUserRepository) fetch(ctx context.Context, query string, args .
 	return uu, nil
 }
 
-func (r *postgresUserRepository) GetById(ctx context.Context, id int) (domain.User, error) {
+func (r *postgresUserRepository) GetById(ctx context.Context, id string) (domain.User, error) {
 	query := `
 		SELECT id, username, name
 		FROM users
@@ -48,6 +48,13 @@ func (r *postgresUserRepository) GetById(ctx context.Context, id int) (domain.Us
 
 	return uu[0], nil
 
+}
+
+func (r *postgresUserRepository) GetAll(ctx context.Context) ([]domain.User, error) {
+	query := `
+		SELECT id, username, name
+		FROM users`
+	return r.fetch(ctx, query)
 }
 
 func (r *postgresUserRepository) GetByUsername(ctx context.Context, username string) (domain.User, error) {

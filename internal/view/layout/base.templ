@@ -1,0 +1,40 @@
+package layout
+
+templ Base(title string, children ...templ.Component) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-widht, inital-scale=1.0"/>
+			<title>Chess Tournament Tracker</title>
+			<script src="https://cdn.jsdelivr.net/gh/gnat/surreal@main/surreal.js"></script>
+			<link rel="stylesheet" href="https://unpkg.com/missing.css"/>
+			<link rel="stylesheet" type="text/css" href="/static/css/style.css"/>
+		</head>
+		<body>
+			<header>
+				<h1>
+					if title != "" {
+						{ title }
+					} else {
+						"Chess Tournament Tracker"
+					}
+				</h1>
+				@nav()
+			</header>
+			for _, child := range children {
+				@child
+			}
+			<!-- HTMX -->
+			<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+		</body>
+	</html>
+}
+
+templ nav() {
+	<nav>
+		<a href="/">Home</a>
+		<a href="/users">Users</a>
+		<a href="/games">Games</a>
+	</nav>
+}

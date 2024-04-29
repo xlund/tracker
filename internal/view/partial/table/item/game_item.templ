@@ -1,0 +1,41 @@
+package item
+
+import "github.com/xlund/tracker/internal/domain"
+import "fmt"
+
+templ Game(game domain.Game) {
+	<tr id="game-{ game.ID }">
+		<td>{ game.Users.White.Username }</td>
+		<td>{ game.Users.Black.Username }</td>
+		<td>{ game.Winner }</td>
+		<td>{ game.Status }</td>
+		<td>
+			<div class="tool-bar">
+				<a
+					role="button"
+					hx-get={ string(templ.URL(fmt.Sprintf(
+                        "/games/%s",
+                        game.ID,
+                    ))) }
+					hx-target="#games-table-data"
+				>View</a>
+				<a
+					role="button"
+					hx-get={ string(templ.URL(fmt.Sprintf(
+                        "/games/%s/edit",
+                        game.ID,
+            ))) }
+					hx-target="#games-table-data"
+				>Edit</a>
+				<button
+					hx-delete={ string(templ.URL(fmt.Sprintf(
+                        "/games/%s",
+                        game.ID,
+                    ))) }
+					hx-target="#games-table-data"
+					class="bad color bg border"
+				>Delete</button>
+			</div>
+		</td>
+	</tr>
+}
