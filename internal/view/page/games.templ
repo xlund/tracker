@@ -5,6 +5,10 @@ import "github.com/xlund/tracker/internal/view/partial/form"
 import "github.com/xlund/tracker/internal/view/partial/table"
 
 templ Games(games []domain.Game, users []domain.User) {
-	@table.Games(games)
-	@form.AddGame(users)
+	<main>
+		<section class="overflow:auto">
+			@table.Games(games)
+		</section>
+		@form.AddGame(users)
+	</main>
 }

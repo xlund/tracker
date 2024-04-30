@@ -26,7 +26,7 @@ func Games(games []domain.Game) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<table><thead><tr><th>White Player</th><th>Black Player</th><th>Winner</th><th>Status</th></tr></thead> <tbody id=\"games-table-data\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<table><thead><tr><th style=\"min-width: 150px\">White Player</th><th style=\"min-width: 150px\">Black Player</th><th>Winner</th><th>Status</th><th>Actions</th></tr></thead> <tbody id=\"games-table-data\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

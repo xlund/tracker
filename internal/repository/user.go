@@ -37,9 +37,7 @@ func (r *postgresUserRepository) GetById(ctx context.Context, id string) (domain
 	query := `
 		SELECT u.id, u.username, u.name, g.id, g.white, g.black, wp.username, bp.username
 		FROM users u
-		LEFT JOIN game_Users g ON u.id = g.white OR u.id = g.black
-		LEFT JOIN users wp ON g.white = wp.id
-		LEFT JOIN users bp ON g.black = bp.id
+		LEFT JOIN game g ON u.id = g.white OR u.id = g.black
 		WHERE id = $1`
 
 	uu, err := r.fetch(ctx, query, id)
@@ -56,51 +54,62 @@ func (r *postgresUserRepository) GetById(ctx context.Context, id string) (domain
 
 }
 
-func (r *postgresUserRepository) GetByIdWithGames(ctx context.Context, id string) (domain.User, []domain.Game, error) {
+func (r *postgresUserRepository) GetByIdWithGames(ctx context.Context, id string) (domain.UserWithGames, error) {
+	log.Default().Println("GetByIdWithGames")
 	query := `
 	SELECT
     u.id AS user_id,
     u.username AS user_username,
     u.name AS user_name,
-    COALESCE(g.id, 0) AS game_id,
-	COALESCE(g.white, 'removed') AS game_white_user_id,
-	COALESCE(g.black, 'removed') AS game_black_user_id,
-	COALESCE(wp.username, 'removed') AS white_player_username,
-	COALESCE(bp.username, 'removed') AS black_player_username
+    g.id AS game_id,
+    g.white AS white_player_id,
+    gwu.username AS white_player_username,
+    g.black AS black_player_id,
+    gbu.username AS black_player_username
 FROM
     users u
 LEFT JOIN
-    game_users g ON u.id = g.white OR u.id = g.black
+    games g ON u.id = g.white OR u.id = g.black
 LEFT JOIN
-    users wp ON g.white = wp.id
+    users gwu ON g.white = gwu.id
 LEFT JOIN
-    users bp ON g.black = bp.id
+    users gbu ON g.black = gbu.id
 WHERE
-    u.id = $1;`
+    u.id = $1;
+		`
 
 	rows, err := r.conn.Query(ctx, query, id)
 	if err != nil {
-		return domain.User{}, []domain.Game{}, err
+		return domain.UserWithGames{}, err
 	}
 	defer rows.Close()
 
-	var uu []domain.User
-	var gg []domain.Game
+	var uu domain.UserWithGames
+	log.Default().Println("GetByIdWithGames:Query Complete")
 	for rows.Next() {
 		var u domain.User
 		var g domain.Game
-		if err := rows.Scan(&u.ID, &u.Username, &u.Name, &g.ID, &g.Users.White.ID, &g.Users.Black.ID, &g.Users.White.Username, &g.Users.Black.Username); err != nil {
-			return domain.User{}, []domain.Game{}, err
+
+		log.Default().Println("GetByIdWithGames:Scan")
+
+		if err := rows.Scan(&u.ID, &u.Username, &u.Name, &g.ID, &g.Users.White.ID, &g.Users.White.Username, &g.Users.Black.ID, &g.Users.Black.Username); err != nil {
+			return domain.UserWithGames{}, err
 		}
-		uu = append(uu, u)
-		gg = append(gg, g)
+		uu.User = u
+		uu.Games = append(uu.Games, g)
 	}
-	if len(uu) == 0 {
-		return domain.User{}, []domain.Game{}, domain.ErrNotFound
-	}
+	log.Default().Println(uu.Games)
 
-	return uu[0], gg, nil
+	return uu, nil
 
+}
+
+func (r *postgresUserRepository) Search(ctx context.Context, q string) ([]domain.User, error) {
+	query := `
+		SELECT id, username, name
+		FROM users
+		WHERE username ILIKE $1`
+	return r.fetch(ctx, query, "%"+q+"%")
 }
 
 func (r *postgresUserRepository) GetAll(ctx context.Context) ([]domain.User, error) {

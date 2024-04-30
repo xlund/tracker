@@ -1,0 +1,9 @@
+package form
+
+import "github.com/xlund/tracker/internal/domain"
+
+templ SelectUser(name string, users []domain.User) {
+	for _, user := range users {
+		<option value={ user.ID }>{ user.Username }</option>
+	}
+}

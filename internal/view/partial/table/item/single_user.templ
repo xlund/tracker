@@ -7,7 +7,7 @@ templ User(user domain.User) {
 	<tr>
 		<td>{ user.Name }</td>
 		<td>{ user.Username }</td>
-		<td class="tool-bar">
+		<td class="f-row flex-wrap:nowrap tool-bar">
 			<a
 				href={ templ.URL(fmt.Sprintf("/users/%s", user.ID)) }
 			>View</a>

@@ -5,15 +5,21 @@ import "github.com/xlund/tracker/internal/domain"
 
 templ Users(users []domain.User) {
 	<main>
-		<figure>
+		<figure class="overflow:auto">
 			@table.Users(users)
 		</figure>
 	</main>
 }
 
-templ UserWithGames(user domain.User, games []domain.Game) {
-	<h1>{ user.Username }</h1>
-	<h2>{ user.Name }</h2>
-	<h2>Games</h2>
-	@table.Games(games)
+templ UserWithGames(user domain.UserWithGames) {
+	<main>
+		<h1>{ user.Username }</h1>
+		<h2>{ user.Name }</h2>
+		<section>
+			<h2>Games</h2>
+			<div class="overflow:auto">
+				@table.Games(user.Games)
+			</div>
+		</section>
+	</main>
 }

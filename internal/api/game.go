@@ -9,28 +9,31 @@ import (
 	"github.com/xlund/tracker/internal/domain"
 	"github.com/xlund/tracker/internal/view/layout"
 	"github.com/xlund/tracker/internal/view/page"
+	"github.com/xlund/tracker/internal/view/partial/table/item"
 )
 
 func (a *api) createGameHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithCancel(r.Context())
 	defer cancel()
-	Users := domain.GameUsers{
-		White: domain.User{
-			ID: r.FormValue("white"),
-		},
-		Black: domain.User{
-			ID: r.FormValue("black"),
-		},
-	}
-	if Users.White.ID == Users.Black.ID {
+	whiteID := r.FormValue("white")
+	blackID := r.FormValue("black")
+	if whiteID == blackID {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	// TODO: validate Users
+	// TODO: validate Clock
 
 	game := domain.Game{
-		ID:    uuid.NewString(),
-		Users: Users,
+		ID: uuid.NewString(),
+		Users: domain.GameUsers{
+			White: domain.User{
+				ID: r.FormValue("white"),
+			},
+			Black: domain.User{
+				ID: r.FormValue("black"),
+			},
+		},
 		Clock: domain.GameClock{
 			Initial:   300,
 			Increment: 15,
@@ -40,12 +43,15 @@ func (a *api) createGameHandler(w http.ResponseWriter, r *http.Request) {
 		Status:  r.FormValue("status"),
 	}
 
-	err := a.gameRepo.CreateOrUpdate(ctx, &game)
+	// TODO: validate
+	log.Default().Printf("creating game: %s", game.ID)
+	game, err := a.gameRepo.CreateOrUpdate(ctx, &game)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Default().Println(err.Error())
 		return
 	}
+	item.Game(game).Render(ctx, w)
 
 }
 
@@ -69,4 +75,19 @@ func (a *api) getGamesHandler(w http.ResponseWriter, r *http.Request) {
 
 	c := layout.Base("Games", page.Games(games, users))
 	c.Render(ctx, w)
+}
+
+func (a *api) deleteGameHandler(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithCancel(r.Context())
+	defer cancel()
+
+	id := r.PathValue("id")
+	log.Default().Printf("deleting game: %s", id)
+	err := a.gameRepo.Delete(ctx, id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Default().Println(err.Error())
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 }

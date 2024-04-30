@@ -15,6 +15,11 @@ type User struct {
 	Name      string
 }
 
+type UserWithGames struct {
+	User
+	Games []Game
+}
+
 func (u *User) NormalizedName() string {
 	return strings.ToLower(u.Name)
 }
@@ -31,7 +36,9 @@ type UserRepository interface {
 	GetById(context.Context, string) (User, error)
 	GetByUsername(context.Context, string) (User, error)
 
-	GetByIdWithGames(context.Context, string) (User, []Game, error)
+	GetByIdWithGames(context.Context, string) (UserWithGames, error)
+
+	Search(context.Context, string) ([]User, error)
 
 	CreateOrUpdate(context.Context, *User) error
 	Delete(context.Context, string) error

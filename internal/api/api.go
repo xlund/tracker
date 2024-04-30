@@ -48,10 +48,12 @@ func (a *api) Routes() *http.ServeMux {
 	r.HandleFunc("/", a.getIndexHandler)
 	r.HandleFunc("GET /users", a.getUsersHandler)
 	r.HandleFunc("POST /users/new", a.createUserHandler)
+	r.HandleFunc("POST /users/search", a.searchUsersHandler)
 	r.HandleFunc("GET /users/{id}", a.getUserHandler)
 	r.HandleFunc("DELETE /users/{id}", a.deleteUserHandler)
 	r.HandleFunc("POST /games/new", a.createGameHandler)
 	r.HandleFunc("GET /games", a.getGamesHandler)
+	r.HandleFunc("DELETE /games/{id}", a.deleteGameHandler)
 	r.HandleFunc("GET /v1/health", a.healthCheckHandler)
 
 	return r

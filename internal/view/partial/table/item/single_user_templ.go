@@ -52,7 +52,7 @@ func User(user domain.User) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td class=\"tool-bar\"><a href=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td class=\"f-row flex-wrap:nowrap tool-bar\"><a href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

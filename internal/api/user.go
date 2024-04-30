@@ -10,6 +10,7 @@ import (
 	"github.com/xlund/tracker/internal/view/layout"
 	"github.com/xlund/tracker/internal/view/page"
 	view "github.com/xlund/tracker/internal/view/page"
+	"github.com/xlund/tracker/internal/view/partial/form"
 )
 
 func (a *api) createUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -62,17 +63,29 @@ func (a *api) deleteUserHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (a *api) getUserHandler(w http.ResponseWriter, r *http.Request) {
+func (a *api) searchUsersHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithCancel(r.Context())
 	defer cancel()
-	id := r.PathValue("id")
-	user, games, err := a.userRepo.GetByIdWithGames(ctx, id)
+	users, err := a.userRepo.Search(ctx, r.FormValue("q"))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Default().Println(err.Error())
 		return
 	}
-	log.Default().Println(games)
-	c := layout.Base("User", page.UserWithGames(user, games))
+	c := layout.Base("Users", form.SelectUser(r.FormValue("target"), users))
+	c.Render(ctx, w)
+}
+
+func (a *api) getUserHandler(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithCancel(r.Context())
+	defer cancel()
+	id := r.PathValue("id")
+	userWithGames, err := a.userRepo.GetByIdWithGames(ctx, id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Default().Println(err.Error())
+		return
+	}
+	c := layout.Base("User", page.UserWithGames(userWithGames))
 	c.Render(ctx, w)
 }

@@ -26,27 +26,27 @@ func Game(game domain.Game) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<tr id=\"game-{ game.ID }\"><td>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<tr id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(game.Users.White.Username)
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("tr-%s", game.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `partial/table/item/game_item.templ`, Line: 8, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `partial/table/item/game_item.templ`, Line: 7, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><td>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(game.Users.Black.Username)
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(game.Users.White.Username)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `partial/table/item/game_item.templ`, Line: 9, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `partial/table/item/game_item.templ`, Line: 8, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -57,9 +57,9 @@ func Game(game domain.Game) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(game.Winner)
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(game.Users.Black.Username)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `partial/table/item/game_item.templ`, Line: 10, Col: 19}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `partial/table/item/game_item.templ`, Line: 9, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -70,63 +70,68 @@ func Game(game domain.Game) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(game.Status)
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(game.Winner)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `partial/table/item/game_item.templ`, Line: 11, Col: 19}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `partial/table/item/game_item.templ`, Line: 10, Col: 19}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td><div class=\"tool-bar\"><a role=\"button\" hx-get=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(string(templ.URL(fmt.Sprintf(
-			"/games/%s",
-			game.ID,
-		))))
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(game.Status)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `partial/table/item/game_item.templ`, Line: 19, Col: 23}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `partial/table/item/game_item.templ`, Line: 11, Col: 19}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#games-table-data\">View</a> <a role=\"button\" hx-get=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td class=\"f-row flex-wrap:nowrap tool-bar\"><a role=\"button\" href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(string(templ.URL(fmt.Sprintf(
+		var templ_7745c5c3_Var7 templ.SafeURL = templ.URL(fmt.Sprintf(
+			"/games/%s",
+			game.ID,
+		))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var7)))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">View</a> <a href=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var8 templ.SafeURL = templ.URL(fmt.Sprintf(
 			"/games/%s/edit",
 			game.ID,
-		))))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `partial/table/item/game_item.templ`, Line: 27, Col: 15}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+		))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var8)))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#games-table-data\">Edit</a> <button hx-delete=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">Edit</a> <button hx-delete=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var8 string
-		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(string(templ.URL(fmt.Sprintf(
+		var templ_7745c5c3_Var9 string
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(string(templ.URL(fmt.Sprintf(
 			"/games/%s",
 			game.ID,
 		))))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `partial/table/item/game_item.templ`, Line: 34, Col: 23}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `partial/table/item/game_item.templ`, Line: 30, Col: 23}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#games-table-data\" class=\"bad color bg border\">Delete</button></div></td></tr>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"closest tr\" class=\"bad color bg border\">Delete</button></td></tr>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

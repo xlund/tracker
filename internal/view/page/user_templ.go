@@ -26,7 +26,7 @@ func Users(users []domain.User) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<main><figure>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<main><figure class=\"overflow:auto\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -45,7 +45,7 @@ func Users(users []domain.User) templ.Component {
 	})
 }
 
-func UserWithGames(user domain.User, games []domain.Game) templ.Component {
+func UserWithGames(user domain.UserWithGames) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -58,14 +58,14 @@ func UserWithGames(user domain.User, games []domain.Game) templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h1>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<main><h1>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(user.Username)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `page/user.templ`, Line: 15, Col: 20}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `page/user.templ`, Line: 16, Col: 21}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -78,17 +78,21 @@ func UserWithGames(user domain.User, games []domain.Game) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(user.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `page/user.templ`, Line: 16, Col: 16}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `page/user.templ`, Line: 17, Col: 17}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h2><h2>Games</h2>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h2><section><h2>Games</h2><div class=\"overflow:auto\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = table.Games(games).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = table.Games(user.Games).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></section></main>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

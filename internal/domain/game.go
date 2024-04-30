@@ -57,6 +57,6 @@ type GameRepository interface {
 	GetById(context.Context, int) (Game, error)
 	GetAll(context.Context) ([]Game, error)
 
-	CreateOrUpdate(context.Context, *Game) error
+	CreateOrUpdate(context.Context, *Game) (Game, error)
 	Delete(context.Context, string) error
 }
