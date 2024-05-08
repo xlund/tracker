@@ -1,6 +1,79 @@
 :root {
+  --max-width: 1200px;
+}
+
+/* Dark Mode */
+:root:not(.no-dark-theme) {
+  --bg: var(--gray-12); /* Dark Gray */
+  --fg: var(--gray-1); /* Light Gray */
+  --muted-fg: var(--gray-7); /* Medium Gray */
+  --faded-fg: var(--gray-11); /* Lighter Gray */
+  --graphical-fg: var(--gray-5); /* Graphical Elements Gray */
+  --box-bg: var(--gray-11); /* Darker Gray */
+  --interactive-bg: var(--gray-10); /* Dark Gray */
+  --accent: var(--gray-5); /* Blue */
+  --muted-accent: var(--gray-8); /* Medium Gray */
+
+  /* Colorways */
+  /* Plain Colorway */
+  --plain-fg: var(--fg);
+  --plain-graphical-fg: var(--graphical-fg);
+  --plain-bg: var(--bg);
+
+  /* Info Colorway */
+  --info-fg: var(--blue-3); /* Lighter Teal */
+  --info-graphical-fg: var(--blue-10); /* Darker Teal */
+  --info-bg: var(--blue-9); /* Dark Teal */
+
+  /* Ok Colorway */
+  --ok-fg: var(--green-3); /* Green */
+  --ok-graphical-fg: var(--green-10); /* Darker Green */
+  --ok-bg: var(--green-9); /* Medium Green */
+
+  /* Bad Colorway */
+  --bad-fg: var(--red-1); /* Red */
+  --bad-graphical-fg: var(--red-10); /* Darker Red */
+  --bad-bg: var(--red-9); /* Medium Red */
+
+  /* Warn Colorway */
+  --warn-fg: var(--yellow-3); /* Yellow */
+  --warn-graphical-fg: var(--yellow-10); /* Darker Yellow */
+  --warn-bg: var(--yellow-9); /* Medium Yellow */
+}
+
+body {
+  background-color: var(--bg);
+}
+
+.page-content {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+form {
+  width: fit-content;
 }
 
 table {
   width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  border: 1px solid var(--faded-fg);
+  margin-bottom: 1rem;
+
+  th,
+  td {
+    padding: 0.5rem;
+    text-align: left;
+  }
+
+  tr {
+    &:nth-child(even) {
+      background-color: var(--faded-fg);
+    }
+    &:nth-child(odd) {
+      background-color: var(--bg);
+    }
+  }
 }

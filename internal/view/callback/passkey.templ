@@ -1,0 +1,21 @@
+package callback
+
+templ Passkey(challenge string) {
+	<script type="module">
+        const key = JSON.parse(challenge)
+        const credential = await navigator.credentials.create( key )
+
+        try {
+        const res = await fetch("/auth/passkeys/verify", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(credential),
+        })
+        console.log(res)
+        } catch(e) {
+            console.log(e)
+        }
+    </script>
+}

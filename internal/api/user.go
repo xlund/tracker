@@ -9,7 +9,6 @@ import (
 	"github.com/xlund/tracker/internal/domain"
 	"github.com/xlund/tracker/internal/view/layout"
 	"github.com/xlund/tracker/internal/view/page"
-	view "github.com/xlund/tracker/internal/view/page"
 	"github.com/xlund/tracker/internal/view/partial/form"
 )
 
@@ -21,15 +20,28 @@ func (a *api) createUserHandler(w http.ResponseWriter, r *http.Request) {
 		ID:       uuid.NewString(),
 		Username: r.FormValue("username"),
 		Name:     r.FormValue("name"),
+		Email:    r.FormValue("email"),
 	}
 
-	err := a.userRepo.CreateOrUpdate(ctx, &user)
+	authId, err := a.authenticator.CreateUser(ctx, user)
 	if err != nil {
-
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Default().Println(err.Error())
 		return
 	}
+
+	user.AuthID = authId
+
+	err = a.userRepo.CreateOrUpdate(ctx, &user)
+	if err != nil {
+		// Remove the created user if db creation failed
+		a.authenticator.RemoveUser(ctx, user.ID)
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Default().Println(err.Error())
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 
 }
 
@@ -44,7 +56,7 @@ func (a *api) getUsersHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := layout.Base("Users", view.Users(users))
+	c := layout.Base("Users", page.Users(users))
 	c.Render(ctx, w)
 }
 

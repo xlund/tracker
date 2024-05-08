@@ -92,6 +92,7 @@ func (r *postgresGameRepository) CreateOrUpdate(ctx context.Context, g *domain.G
 	games_query := `
 		INSERT INTO games (id, white, black,  status, variant, winner) VALUES ($1, $2, $3, $4, $5, $6 )
 		RETURNING id, white, black,  status, variant, winner;
+
 		`
 	err := r.conn.QueryRow(ctx, games_query, g.ID, g.Users.White.ID, g.Users.Black.ID, g.Status, g.Variant, g.Winner).Scan(&g.ID, &g.Users.White.ID, &g.Users.Black.ID, &g.Status, &g.Variant, &g.Winner)
 

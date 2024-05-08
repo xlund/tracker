@@ -5,7 +5,7 @@ import "github.com/xlund/tracker/internal/view/partial/table"
 import "github.com/xlund/tracker/internal/view/partial/form"
 
 templ Index(users []domain.User) {
-	<main class="container">
+	<div class="page-content">
 		<h1>Chess Torunament Tracker</h1>
 		<h2>Add User</h2>
 		@form.AddUser()
@@ -13,8 +13,6 @@ templ Index(users []domain.User) {
 		if len(users) == 0 {
 			<p>No Users</p>
 		}
-		<figure>
-			@table.Users(users)
-		</figure>
-	</main>
+		@table.Users(users)
+	</div>
 }

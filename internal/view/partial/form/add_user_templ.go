@@ -23,7 +23,7 @@ func AddUser() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<figure><form hx-post=\"/users/new\" hx-target=\"#users-table-data\" hx-swap=\"beforeend\" class=\"table rows\"><div><label for=\"username\">Username</label> <input id=\"username\" name=\"username\" type=\"text\" placeholder=\"Username\" required></div><div><label for=\"name\">Name</label> <input id=\"name\" name=\"name\" type=\"text\" autocomplete=\"name\" placeholder=\"given-name\" required></div><input type=\"submit\" value=\"Add User\"></form></figure>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<form hx-post=\"/auth/passkeys/create\"><fieldset><div class=\"table rows\"><div><label for=\"username\">Username</label> <input id=\"username\" name=\"username\" type=\"text\" placeholder=\"Username\" required></div><div><label for=\"email\">Email</label> <input id=\"email\" name=\"email\" type=\"email\" placeholder=\"Email\" required></div><div><label for=\"name\">Full name</label> <input id=\"name\" name=\"name\" type=\"text\" autocomplete=\"name\" placeholder=\"given-name\" required></div></div><hr><input type=\"submit\" value=\"Create User\"></fieldset></form>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

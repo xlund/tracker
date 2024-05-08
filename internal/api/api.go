@@ -13,8 +13,9 @@ import (
 type api struct {
 	httpClient *http.Client
 
-	userRepo domain.UserRepository
-	gameRepo domain.GameRepository
+	userRepo      domain.UserRepository
+	gameRepo      domain.GameRepository
+	authenticator domain.Authenticator
 }
 
 func NewApi(ctx context.Context, pool *pgxpool.Pool) *api {
@@ -23,9 +24,12 @@ func NewApi(ctx context.Context, pool *pgxpool.Pool) *api {
 
 	gameRepo := repository.NewPostgresGame(pool)
 
+	authenticator := repository.NewCorbadoAuthenticator()
+
 	client := &http.Client{}
 	return &api{
-		httpClient: client,
+		httpClient:    client,
+		authenticator: authenticator,
 
 		userRepo: userRepo,
 		gameRepo: gameRepo,
@@ -46,14 +50,23 @@ func (a *api) Routes() *http.ServeMux {
 	r.Handle("/static/", http.StripPrefix("/static/", fs))
 
 	r.HandleFunc("/", a.getIndexHandler)
+
 	r.HandleFunc("GET /users", a.getUsersHandler)
+
 	r.HandleFunc("POST /users/new", a.createUserHandler)
 	r.HandleFunc("POST /users/search", a.searchUsersHandler)
 	r.HandleFunc("GET /users/{id}", a.getUserHandler)
 	r.HandleFunc("DELETE /users/{id}", a.deleteUserHandler)
+
+	r.HandleFunc("POST /auth/passkeys/begin", a.beginRegistrationHandler)
+	r.HandleFunc("POST /auth/passkeys/complete", a.completeRegistrationHandler)
+
 	r.HandleFunc("POST /games/new", a.createGameHandler)
 	r.HandleFunc("GET /games", a.getGamesHandler)
 	r.HandleFunc("DELETE /games/{id}", a.deleteGameHandler)
+
+	r.HandleFunc("GET /auth", a.authHandler)
+
 	r.HandleFunc("GET /v1/health", a.healthCheckHandler)
 
 	return r

@@ -1,0 +1,50 @@
+package page
+
+templ Auth() {
+	<head>
+		<script src="https://unpkg.com/@simplewebauthn/browser/dist/bundle/index.umd.min.js"></script>
+		<link
+			rel="stylesheet"
+			href="https://unpkg.com/@corbado/web-js@2.6.0/dist/bundle/index.css"
+		/>
+		<script src="https://unpkg.com/@corbado/web-js@2.6.0/dist/bundle/index.js"></script>
+		<script src="/static/js/auth.js"></script>
+	</head>
+	<main>
+		<h1>Register</h1>
+		@register()
+	</main>
+}
+
+templ register() {
+	<form action="/auth/passkeys/begin">
+		<div class="table rows">
+			<div>
+				<label for="username">
+					Username
+				</label>
+				<input
+					id="username"
+					name="username"
+					type="text"
+					placeholder="Username"
+					required
+				/>
+			</div>
+			<div>
+				<label for="email">
+					Email
+				</label>
+				<input
+					id="email"
+					name="email"
+					type="email"
+					placeholder="Email"
+					required
+				/>
+			</div>
+		</div>
+		<input type="submit" value="Register"/>
+	</form>
+	<div id="delivery"></div>
+}

@@ -5,9 +5,7 @@ import "github.com/xlund/tracker/internal/domain"
 
 templ Users(users []domain.User) {
 	<main>
-		<figure class="overflow:auto">
-			@table.Users(users)
-		</figure>
+		@table.Users(users)
 	</main>
 }
 
