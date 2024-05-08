@@ -14,43 +14,6 @@ import (
 	"github.com/xlund/tracker/internal/domain"
 )
 
-// type passageAuthenticator struct {
-// 	Passage *passage.App
-// }
-
-// func NewPassageAuthenticator() domain.Authenticator {
-// 	psg, err := passage.New(
-// 		os.Getenv("PASSAGE_APP_ID"),
-// 		&passage.Config{
-// 			APIKey: os.Getenv("PASSAGE_API_KEY"),
-// 		},
-// 	)
-
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	return &passageAuthenticator{
-// 		Passage: psg,
-// 	}
-// }
-
-// func (a *passageAuthenticator) CreateUser(ctx context.Context, u domain.User) (string, error) {
-// 	usr := passage.CreateUserBody{
-// 		Email: u.Email,
-// 	}
-// 	passageUser, err := a.Passage.CreateUser(usr)
-
-// 	if err != nil {
-// 		return "", err
-// 	}
-// 	return passageUser.ID, nil
-// }
-
-// func (a *passageAuthenticator) RemoveUser(ctx context.Context, id string) error {
-// 	_, err := a.Passage.DeleteUser(id)
-// 	return err
-// }
-
 type corbadoAuthenticator struct {
 	Config  *corbado.Config
 	Corbado *corbado.Impl
