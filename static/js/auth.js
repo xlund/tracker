@@ -7,6 +7,8 @@ async function handleSubmit(e) {
 
   const clientData = await createCredential(credentialOptions);
 
+  // Stringifying the JSON removes the data in ArrayBuffers
+  // on the PublicKeyCredential object and sets it to empty objects
   const passkey = await fetch("/auth/passkeys/complete", {
     method: "POST",
     body: JSON.stringify(clientData.response),
@@ -17,6 +19,7 @@ async function createCredential(credentialOptions) {
   const { publicKey } = credentialOptions;
   if (!publicKey) return Error("Passkey not found");
 
+  // This successfuly promts the user to sign the credential
   const credential = await navigator.credentials.create({
     publicKey: {
       ...publicKey,
@@ -28,6 +31,17 @@ async function createCredential(credentialOptions) {
     },
   });
 
+  // Creates a PublicKeyCredential object
+  //   PublicKeyCredential {
+  //     id: '...',
+  //     rawId: ArrayBuffer(59),
+  //     response: AuthenticatorAttestationResponse {
+  //         clientDataJSON: ArrayBuffer(121),
+  //         attestationObject: ArrayBuffer(306),
+  //     },
+  //     type: 'public-key'
+  // }
+  console.log(credential);
   return credential;
 }
 

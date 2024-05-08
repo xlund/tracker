@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"encoding/json"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -53,23 +53,9 @@ func (a *corbadoAuthenticator) CreateUser(ctx context.Context, u domain.User) (s
 
 func (a *corbadoAuthenticator) StartWebAuthnRegister(ctx context.Context, u domain.User, r *http.Request) (string, error) {
 	log.Default().Println("StartWebAuthnRegister")
-	ip, _, err := net.SplitHostPort(r.RemoteAddr)
-	if err != nil {
-		return "", err
-	}
+	ip, _, _ := net.SplitHostPort(r.RemoteAddr)
 
-	log.Default().Printf("StartWebAuthnRegister::user: %+v", u)
-	err = u.Validate()
-
-	if err != nil {
-		return "", err
-	}
-
-	_, err = a.CreateUser(ctx, u)
-
-	if err != nil {
-		return "", err
-	}
+	_, err := a.CreateUser(ctx, u)
 
 	res, err := a.Corbado.Passkeys().RegisterStart(ctx, api.WebAuthnRegisterStartReq{
 		Username: u.Username,
@@ -82,45 +68,45 @@ func (a *corbadoAuthenticator) StartWebAuthnRegister(ctx context.Context, u doma
 	if err != nil {
 		return "", err
 	}
+
 	return res.PublicKeyCredentialCreationOptions, nil
 }
 
 func (a *corbadoAuthenticator) CompleteWebAuthRegister(ctx context.Context, r *http.Request) error {
-	_, _, err := net.SplitHostPort(r.RemoteAddr)
+	ip, _, err := net.SplitHostPort(r.RemoteAddr)
 
 	if err != nil {
 		return err
 	}
 
 	log.Default().Println("CompleteWebAuthRegister")
-	// parse the json data from r.body
-	var cred map[string]interface{}
-	err = json.NewDecoder(r.Body).Decode(&cred)
-	log.Println("This is the data", cred)
+
+	// Reading the stringified JSON body from the request
+	credential, _ := io.ReadAll(r.Body)
+
+	_, err = a.Corbado.Passkeys().RegisterFinish(ctx, api.WebAuthnFinishReq{
+		ClientInfo: common.ClientInfo{
+			RemoteAddress: ip,
+			UserAgent:     r.UserAgent(),
+		},
+
+		// The stringified body from the request
+		// does not contain enough data.
+
+		// The rawId, response.attestationObject
+		// and response.clientDataJSON is not set.
+		PublicKeyCredential: string(credential),
+	})
+
 	if err != nil {
-		log.Default().Println(err)
+		return err
 	}
+
+	log.Default().Println("CompleteWebAuthRegister: Finished")
 	return nil
-
-	// req := api.WebAuthnFinishReq{
-	// 	ClientInfo: common.ClientInfo{
-	// 		RemoteAddress: ip,
-	// 		UserAgent:     r.UserAgent(),
-	// 	},
-	// 	PublicKeyCredential: string(credential),
-	// }
-
-	// res, err := a.Corbado.Passkeys().RegisterFinish(ctx, req)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// log.Default().Println("CompleteWebAuthRegister::res")
-	// log.Default().Println(res)
-	// return nil
 }
 
 func (a *corbadoAuthenticator) RemoveUser(ctx context.Context, id string) error {
-	_, err := a.Corbado.Users().Delete(ctx, id, api.UserDeleteReq{})
-	return err
+	// TODO
+	return nil
 }
