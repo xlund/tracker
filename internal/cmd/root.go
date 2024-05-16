@@ -32,7 +32,6 @@ func Exectue(ctx context.Context) int {
 		_ = srv.ListenAndServe()
 	}()
 
-	println("Listening on localhost:" + strconv.Itoa(port))
 	<-ctx.Done()
 	_ = srv.Shutdown(ctx)
 

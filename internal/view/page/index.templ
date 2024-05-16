@@ -1,18 +1,11 @@
 package page
 
 import "github.com/xlund/tracker/internal/domain"
-import "github.com/xlund/tracker/internal/view/partial/table"
-import "github.com/xlund/tracker/internal/view/partial/form"
 
 templ Index(users []domain.User) {
-	<div class="page-content">
-		<h1>Chess Torunament Tracker</h1>
-		<h2>Add User</h2>
-		@form.AddUser()
-		<h2>Users</h2>
-		if len(users) == 0 {
-			<p>No Users</p>
-		}
-		@table.Users(users)
+	<div>
+		<h3>Auth0 Example</h3>
+		<p>This is a simple example of how to use the Auth0 API to manage users.</p>
+		<a href="/login">Login</a>
 	</div>
 }

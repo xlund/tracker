@@ -2,68 +2,102 @@ package api
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/base64"
 	"log"
 	"net/http"
+	"net/url"
+	"os"
 
-	"github.com/google/uuid"
-	"github.com/xlund/tracker/internal/domain"
-	"github.com/xlund/tracker/internal/view/layout"
-	"github.com/xlund/tracker/internal/view/page"
+	"github.com/labstack/echo-contrib/session"
+	"github.com/labstack/echo/v4"
 )
 
-func (a *api) authHandler(w http.ResponseWriter, r *http.Request) {
-
-	ctx, cancel := context.WithCancel(r.Context())
-	defer cancel()
-	c := layout.Base("Login", page.Auth())
-
-	c.Render(ctx, w)
+func (a *api) login(c echo.Context) error {
+	state, err := generateRandomState()
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	// save state to session
+	session, err := session.Get("auth-session", c)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	session.Values["state"] = state
+	if err := session.Save(c.Request(), c.Response()); err != nil {
+		return err
+	}
+	url := a.authenticator.AuthURL(state)
+	return c.Redirect(http.StatusFound, url)
 }
 
-func (a *api) beginRegistrationHandler(w http.ResponseWriter, r *http.Request) {
-	ctx, cancel := context.WithCancel(r.Context())
-	defer cancel()
-	log.Default().Println("beginRegistrationHandler")
-	username := r.FormValue("username")
-	email := r.FormValue("email")
-
-	user := domain.User{
-		ID:       uuid.NewString(),
-		Username: username,
-		Email:    email,
-	}
-
-	log.Default().Printf("beginRegistrationHandler::user: %+v", user)
-
-	challenge, err := a.authenticator.StartWebAuthnRegister(ctx, user, r)
+func generateRandomState() (string, error) {
+	b := make([]byte, 32)
+	_, err := rand.Read(b)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Default().Println(err.Error())
-		return
+		return "", err
 	}
 
-	_, err = w.Write([]byte(challenge))
-	if err != nil {
-		log.Default().Println(err.Error())
-		return
-	}
-
+	state := base64.StdEncoding.EncodeToString(b)
+	return state, nil
 }
 
-func (a *api) completeRegistrationHandler(w http.ResponseWriter, r *http.Request) {
-	ctx, cancel := context.WithCancel(r.Context())
+func (a *api) authCallback(c echo.Context) error {
+
+	ctx, cancel := context.WithCancel(c.Request().Context())
 	defer cancel()
 
-	log.Default().Println("completeRegistrationHandler")
-
-	err := a.authenticator.CompleteWebAuthRegister(ctx, r)
+	session, err := session.Get("auth-session", c)
+	if c.QueryParam("state") != session.Values["state"] {
+		return c.String(http.StatusBadRequest, "Invalid state parameter.")
+	}
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Default().Println(err.Error())
-		return
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	log.Default().Println("registration complete")
+	token, err := a.authenticator.GetToken(ctx, c.QueryParam("code"))
+	log.Default().Println(token)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
 
-	w.WriteHeader(http.StatusOK)
+	idToken, err := a.authenticator.VerifyIdToken(ctx, token)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	var profile map[string]interface{}
+
+	err = idToken.Claims(&profile)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	session.Values["profile"] = profile
+	session.Values["access_token"] = token.AccessToken
+
+	if err := session.Save(c.Request(), c.Response()); err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	return c.Redirect(http.StatusFound, "/users/me")
+}
+
+func (a *api) logout(c echo.Context) error {
+	logoutUrl, err := url.Parse("https://" + os.Getenv("AUTH0_DOMAIN") + "/v2/logout")
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	scheme := "http"
+	if c.Request().TLS != nil {
+		scheme = "https"
+	}
+	returnTo, err := url.Parse(scheme + "://" + c.Request().Host)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	params := url.Values{}
+	params.Add("returnTo", returnTo.String())
+	params.Add("client_id", os.Getenv("AUTH0_CLIENT_ID"))
+	logoutUrl.RawQuery = params.Encode()
+	return c.Redirect(http.StatusFound, logoutUrl.String())
 }

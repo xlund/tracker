@@ -23,8 +23,25 @@ type UserWithGames struct {
 	Games []Game
 }
 
+type UserAuthProfile struct {
+	Nickname  string
+	Picture   string
+	Name      string
+	GivenName string
+}
+
 func (u *User) NormalizedName() string {
 	return strings.ToLower(u.Name)
+}
+
+func UserAUthProfileFromMap(m map[string]interface{}) UserAuthProfile {
+
+	return UserAuthProfile{
+		Nickname:  m["nickname"].(string),
+		Picture:   m["picture"].(string),
+		Name:      m["name"].(string),
+		GivenName: m["given_name"].(string),
+	}
 }
 
 func (u *User) Validate() error {

@@ -2,12 +2,17 @@ package api
 
 import (
 	"context"
+	"encoding/gob"
 	"fmt"
 	"net/http"
 
+	"github.com/gorilla/sessions"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/labstack/echo-contrib/session"
+	"github.com/labstack/echo/v4"
 	"github.com/xlund/tracker/internal/domain"
 	"github.com/xlund/tracker/internal/repository"
+	"golang.org/x/oauth2"
 )
 
 type api struct {
@@ -24,7 +29,7 @@ func NewApi(ctx context.Context, pool *pgxpool.Pool) *api {
 
 	gameRepo := repository.NewPostgresGame(pool)
 
-	authenticator := repository.NewCorbadoAuthenticator()
+	authenticator, _ := repository.NewAuth0Authenticator()
 
 	client := &http.Client{}
 	return &api{
@@ -43,31 +48,36 @@ func (a *api) Server(port int) *http.Server {
 	}
 }
 
-func (a *api) Routes() *http.ServeMux {
-	r := http.NewServeMux()
+func (a *api) Routes() *echo.Echo {
+	e := echo.New()
 
-	fs := http.FileServer(http.Dir("../static"))
-	r.Handle("/static/", http.StripPrefix("/static/", fs))
+	// To store custom types in our cookies,
+	// we must first register them using gob.Register
+	gob.Register(map[string]interface{}{})
+	gob.Register(&oauth2.Token{})
+	e.Use(session.Middleware(sessions.NewCookieStore([]byte("secret"))))
 
-	r.HandleFunc("/", a.getIndexHandler)
+	e.Static("/static", "js")
+	e.Static("/static", "css")
 
-	r.HandleFunc("GET /users", a.getUsersHandler)
+	e.GET("/", a.getIndex)
 
-	r.HandleFunc("POST /users/new", a.createUserHandler)
-	r.HandleFunc("POST /users/search", a.searchUsersHandler)
-	r.HandleFunc("GET /users/{id}", a.getUserHandler)
-	r.HandleFunc("DELETE /users/{id}", a.deleteUserHandler)
+	e.GET("/users", a.getUsers)
+	e.POST("/users/new", a.createUser)
+	e.DELETE("/users/:id", a.deleteUser)
 
-	r.HandleFunc("POST /auth/passkeys/begin", a.beginRegistrationHandler)
-	r.HandleFunc("POST /auth/passkeys/complete", a.completeRegistrationHandler)
+	e.GET("/users/:id", a.getUser)
+	e.GET("/users/me", a.getUser)
 
-	r.HandleFunc("POST /games/new", a.createGameHandler)
-	r.HandleFunc("GET /games", a.getGamesHandler)
-	r.HandleFunc("DELETE /games/{id}", a.deleteGameHandler)
+	e.GET("/games", a.getGames)
+	e.POST("/games/new", a.createGame)
+	e.DELETE("/games/:id", a.deleteGame)
 
-	r.HandleFunc("GET /auth", a.authHandler)
+	e.GET("/login", a.login)
+	e.GET("/authenticated", a.authCallback)
+	e.GET("/logout", a.logout)
 
-	r.HandleFunc("GET /v1/health", a.healthCheckHandler)
+	e.GET("/v1/health", a.healthCheck)
 
-	return r
+	return e
 }

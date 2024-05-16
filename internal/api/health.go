@@ -1,8 +1,11 @@
 package api
 
-import "net/http"
+import (
+	"net/http"
 
-func (a *api) healthCheckHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("OK"))
+	"github.com/labstack/echo/v4"
+)
+
+func (a *api) healthCheck(c echo.Context) error {
+	return c.String(http.StatusOK, "OK")
 }

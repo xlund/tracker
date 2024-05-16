@@ -6,20 +6,21 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 	"github.com/xlund/tracker/internal/domain"
 	"github.com/xlund/tracker/internal/view/layout"
 	"github.com/xlund/tracker/internal/view/page"
 	"github.com/xlund/tracker/internal/view/partial/table/item"
 )
 
-func (a *api) createGameHandler(w http.ResponseWriter, r *http.Request) {
-	ctx, cancel := context.WithCancel(r.Context())
+func (a *api) createGame(e echo.Context) error {
+	ctx, cancel := context.WithCancel(e.Request().Context())
 	defer cancel()
-	whiteID := r.FormValue("white")
-	blackID := r.FormValue("black")
+
+	whiteID := e.FormValue("white")
+	blackID := e.FormValue("black")
 	if whiteID == blackID {
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		return e.String(http.StatusBadRequest, "cannot play against yourself")
 	}
 	// TODO: validate Users
 	// TODO: validate Clock
@@ -28,66 +29,58 @@ func (a *api) createGameHandler(w http.ResponseWriter, r *http.Request) {
 		ID: uuid.NewString(),
 		Users: domain.GameUsers{
 			White: domain.User{
-				ID: r.FormValue("white"),
+				ID: e.FormValue("white"),
 			},
 			Black: domain.User{
-				ID: r.FormValue("black"),
+				ID: e.FormValue("black"),
 			},
 		},
 		Clock: domain.GameClock{
 			Initial:   300,
 			Increment: 15,
 		},
-		Variant: r.FormValue("variant"),
-		Winner:  r.FormValue("winner"),
-		Status:  r.FormValue("status"),
+		Variant: e.FormValue("variant"),
+		Winner:  e.FormValue("winner"),
+		Status:  e.FormValue("status"),
 	}
 
 	// TODO: validate
 	log.Default().Printf("creating game: %s", game.ID)
 	game, err := a.gameRepo.CreateOrUpdate(ctx, &game)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Default().Println(err.Error())
-		return
+		return e.String(http.StatusInternalServerError, err.Error())
 	}
-	item.Game(game).Render(ctx, w)
-
+	return item.Game(game).Render(ctx, e.Response().Writer)
 }
 
-func (a *api) getGamesHandler(w http.ResponseWriter, r *http.Request) {
-	ctx, cancel := context.WithCancel(r.Context())
+func (a *api) getGames(e echo.Context) error {
+	ctx, cancel := context.WithCancel(e.Request().Context())
 	defer cancel()
 
 	games, err := a.gameRepo.GetAll(ctx)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Default().Println(err.Error())
-		return
+		return e.String(http.StatusInternalServerError, err.Error())
 	}
 
 	users, err := a.userRepo.GetAll(ctx)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Default().Println(err.Error())
-		return
+		return e.String(http.StatusInternalServerError, err.Error())
 	}
 
 	c := layout.Base("Games", page.Games(games, users))
-	c.Render(ctx, w)
+	return c.Render(ctx, e.Response().Writer)
 }
 
-func (a *api) deleteGameHandler(w http.ResponseWriter, r *http.Request) {
-	ctx, cancel := context.WithCancel(r.Context())
+func (a *api) deleteGame(c echo.Context) error {
+	ctx, cancel := context.WithCancel(c.Request().Context())
 	defer cancel()
 
-	id := r.PathValue("id")
+	id := c.Param("id")
 	log.Default().Printf("deleting game: %s", id)
 	err := a.gameRepo.Delete(ctx, id)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Default().Println(err.Error())
-		return
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
-	w.WriteHeader(http.StatusOK)
+
+	return c.String(http.StatusOK, "deleted game")
 }

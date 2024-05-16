@@ -1,0 +1,19 @@
+package page
+
+templ Authenticated(name string, picture string) {
+	<div>
+		<h3>You are authenticated!</h3>
+		if picture != "" {
+			<img src={ picture }/>
+		}
+		<p>Welcome, { name }!</p>
+		<button id="logout">
+			Logout
+			<script>
+            me().on("click", (e) => {
+                Cookies.remove('auth-session')
+            })
+        </script>
+		</button>
+	</div>
+}

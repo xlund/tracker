@@ -2,111 +2,66 @@ package repository
 
 import (
 	"context"
-	"io"
-	"log"
-	"net"
-	"net/http"
+	"fmt"
 	"os"
 
-	"github.com/corbado/corbado-go"
-	"github.com/corbado/corbado-go/pkg/generated/api"
-	"github.com/corbado/corbado-go/pkg/generated/common"
+	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/xlund/tracker/internal/domain"
+	"golang.org/x/oauth2"
 )
 
-type corbadoAuthenticator struct {
-	Config  *corbado.Config
-	Corbado *corbado.Impl
+type auth0Authenticator struct {
+	*oidc.Provider
+	oauth2.Config
 }
 
-func NewCorbadoAuthenticator() domain.Authenticator {
-	config, err := corbado.NewConfig(
-		os.Getenv("CORBADO_PROJECT_ID"),
-		os.Getenv("CORBADO_API_SECRET"),
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	sdk, err := corbado.NewSDK(config)
+func NewAuth0Authenticator() (domain.Authenticator, error) {
+	provider, err := oidc.NewProvider(context.Background(), "https://"+os.Getenv("AUTH0_DOMAIN")+"/")
 
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return &corbadoAuthenticator{Config: config, Corbado: sdk}
+
+	conf := oauth2.Config{
+		ClientID:     os.Getenv("AUTH0_CLIENT_ID"),
+		ClientSecret: os.Getenv("AUTH0_CLIENT_SECRET"),
+		Endpoint:     provider.Endpoint(),
+		RedirectURL:  os.Getenv("AUTH0_CALLBACK_URL"),
+		Scopes:       []string{oidc.ScopeOpenID, "profile"},
+	}
+	return &auth0Authenticator{provider, conf}, nil
 }
 
-func (a *corbadoAuthenticator) CreateUser(ctx context.Context, u domain.User) (string, error) {
-	var corbadoUser = api.UserCreateReq{
-		RequestID: &u.ID,
-		Name:      u.Username,
-		FullName:  &u.Name,
-		Email:     &u.Email,
-	}
-	usr, err := a.Corbado.Users().Create(ctx, corbadoUser)
-	if err != nil {
-		return "", err
-	}
+func (a *auth0Authenticator) GetToken(ctx context.Context, code string) (*oauth2.Token, error) {
 
-	return usr.Data.UserID, nil
+	token, err := a.exchange(ctx, code)
+	if err != nil {
+		return nil, err
+	}
+	return token, nil
 }
 
-func (a *corbadoAuthenticator) StartWebAuthnRegister(ctx context.Context, u domain.User, r *http.Request) (string, error) {
-	log.Default().Println("StartWebAuthnRegister")
-	ip, _, _ := net.SplitHostPort(r.RemoteAddr)
-
-	_, err := a.CreateUser(ctx, u)
-
-	res, err := a.Corbado.Passkeys().RegisterStart(ctx, api.WebAuthnRegisterStartReq{
-		Username: u.Username,
-		ClientInfo: common.ClientInfo{
-			RemoteAddress: ip,
-			UserAgent:     r.UserAgent(),
-		},
-	})
-
+func (a *auth0Authenticator) exchange(ctx context.Context, code string) (*oauth2.Token, error) {
+	token, err := a.Exchange(ctx, code)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-
-	return res.PublicKeyCredentialCreationOptions, nil
+	return token, nil
 }
 
-func (a *corbadoAuthenticator) CompleteWebAuthRegister(ctx context.Context, r *http.Request) error {
-	ip, _, err := net.SplitHostPort(r.RemoteAddr)
-
-	if err != nil {
-		return err
+func (a *auth0Authenticator) VerifyIdToken(ctx context.Context, token *oauth2.Token) (*oidc.IDToken, error) {
+	rawIDToken, ok := token.Extra("id_token").(string)
+	if !ok {
+		return nil, fmt.Errorf("no id_token field in oauth2 token")
 	}
 
-	log.Default().Println("CompleteWebAuthRegister")
-
-	// Reading the stringified JSON body from the request
-	credential, _ := io.ReadAll(r.Body)
-
-	_, err = a.Corbado.Passkeys().RegisterFinish(ctx, api.WebAuthnFinishReq{
-		ClientInfo: common.ClientInfo{
-			RemoteAddress: ip,
-			UserAgent:     r.UserAgent(),
-		},
-
-		// The stringified body from the request
-		// does not contain enough data.
-
-		// The rawId, response.attestationObject
-		// and response.clientDataJSON is not set.
-		PublicKeyCredential: string(credential),
-	})
-
-	if err != nil {
-		return err
+	oidcConfig := &oidc.Config{
+		ClientID: a.ClientID,
 	}
 
-	log.Default().Println("CompleteWebAuthRegister: Finished")
-	return nil
+	return a.Verifier(oidcConfig).Verify(ctx, rawIDToken)
 }
 
-func (a *corbadoAuthenticator) RemoveUser(ctx context.Context, id string) error {
-	// TODO
-	return nil
+func (a *auth0Authenticator) AuthURL(state string) string {
+	return a.AuthCodeURL(state)
 }

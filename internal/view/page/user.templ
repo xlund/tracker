@@ -3,21 +3,32 @@ package page
 import "github.com/xlund/tracker/internal/view/partial/table"
 import "github.com/xlund/tracker/internal/domain"
 
+templ UserProfile(u domain.UserAuthProfile) {
+	<head>
+		<script src="
+https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js
+"></script>
+	</head>
+	<div>
+		<h1>Welcome</h1>
+		<h3>{ u.Name }</h3>
+		if u.Picture != "" {
+			<img src={ u.Picture }/>
+		}
+	</div>
+	<div>
+		<button id="logout">Logout</button>
+		<script>
+            me().on("click", (e) => {
+                Cookies.remove('auth-session')
+                window.location.href = '/logout'
+            })
+        </script>
+	</div>
+}
+
 templ Users(users []domain.User) {
 	<main>
 		@table.Users(users)
-	</main>
-}
-
-templ UserWithGames(user domain.UserWithGames) {
-	<main>
-		<h1>{ user.Username }</h1>
-		<h2>{ user.Name }</h2>
-		<section>
-			<h2>Games</h2>
-			<div class="overflow:auto">
-				@table.Games(user.Games)
-			</div>
-		</section>
 	</main>
 }

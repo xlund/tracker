@@ -5,99 +5,62 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/google/uuid"
+	"github.com/labstack/echo-contrib/session"
+	"github.com/labstack/echo/v4"
 	"github.com/xlund/tracker/internal/domain"
 	"github.com/xlund/tracker/internal/view/layout"
 	"github.com/xlund/tracker/internal/view/page"
-	"github.com/xlund/tracker/internal/view/partial/form"
 )
 
-func (a *api) createUserHandler(w http.ResponseWriter, r *http.Request) {
-	ctx, cancel := context.WithCancel(r.Context())
+func (a *api) createUser(e echo.Context) error {
+
+	_, cancel := context.WithCancel(e.Request().Context())
 	defer cancel()
-
-	user := domain.User{
-		ID:       uuid.NewString(),
-		Username: r.FormValue("username"),
-		Name:     r.FormValue("name"),
-		Email:    r.FormValue("email"),
-	}
-
-	authId, err := a.authenticator.CreateUser(ctx, user)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Default().Println(err.Error())
-		return
-	}
-
-	user.AuthID = authId
-
-	err = a.userRepo.CreateOrUpdate(ctx, &user)
-	if err != nil {
-		// Remove the created user if db creation failed
-		a.authenticator.RemoveUser(ctx, user.ID)
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Default().Println(err.Error())
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
+	return e.String(http.StatusOK, "create user")
 
 }
 
-func (a *api) getUsersHandler(w http.ResponseWriter, r *http.Request) {
-	ctx, cancel := context.WithCancel(r.Context())
+func (a *api) getUser(c echo.Context) error {
+	session, err := session.Get("auth-session", c)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	if session.Values["profile"] == nil {
+		return c.String(http.StatusUnauthorized, "unauthorized")
+	}
+
+	profile := domain.UserAUthProfileFromMap(session.Values["profile"].(map[string]interface{}))
+
+	t := layout.Base("User", page.UserProfile(profile))
+
+	return t.Render(c.Request().Context(), c.Response().Writer)
+}
+
+func (a *api) getUsers(e echo.Context) error {
+	ctx, cancel := context.WithCancel(e.Request().Context())
 	defer cancel()
 
 	users, err := a.userRepo.GetAll(ctx)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Default().Println(err.Error())
-		return
+		return e.String(http.StatusInternalServerError, err.Error())
 	}
 
 	c := layout.Base("Users", page.Users(users))
-	c.Render(ctx, w)
+	return c.Render(ctx, e.Response().Writer)
+
 }
 
-func (a *api) deleteUserHandler(w http.ResponseWriter, r *http.Request) {
-	ctx, cancel := context.WithCancel(r.Context())
+func (a *api) deleteUser(e echo.Context) error {
+	ctx, cancel := context.WithCancel(e.Request().Context())
 	defer cancel()
 
-	id := r.PathValue("id")
-	log.Default().Printf("deleting user %s", r.FormValue("id"))
+	id := e.Param("id")
+	log.Default().Printf("deleting user %s", id)
 	err := a.userRepo.Delete(ctx, id)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Default().Println(err.Error())
-		return
+		return e.String(http.StatusInternalServerError, err.Error())
 	}
-	w.WriteHeader(http.StatusOK)
-}
 
-func (a *api) searchUsersHandler(w http.ResponseWriter, r *http.Request) {
-	ctx, cancel := context.WithCancel(r.Context())
-	defer cancel()
-	users, err := a.userRepo.Search(ctx, r.FormValue("q"))
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Default().Println(err.Error())
-		return
-	}
-	c := layout.Base("Users", form.SelectUser(r.FormValue("target"), users))
-	c.Render(ctx, w)
-}
-
-func (a *api) getUserHandler(w http.ResponseWriter, r *http.Request) {
-	ctx, cancel := context.WithCancel(r.Context())
-	defer cancel()
-	id := r.PathValue("id")
-	userWithGames, err := a.userRepo.GetByIdWithGames(ctx, id)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Default().Println(err.Error())
-		return
-	}
-	c := layout.Base("User", page.UserWithGames(userWithGames))
-	c.Render(ctx, w)
+	return e.String(http.StatusOK, "deleted user")
 }

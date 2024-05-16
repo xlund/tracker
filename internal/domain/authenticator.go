@@ -2,13 +2,13 @@ package domain
 
 import (
 	"context"
-	"net/http"
+
+	"github.com/coreos/go-oidc/v3/oidc"
+	"golang.org/x/oauth2"
 )
 
 type Authenticator interface {
-	// Not sure if it needs to return a user
-	CreateUser(ctx context.Context, u User) (string, error)
-	StartWebAuthnRegister(ctx context.Context, u User, r *http.Request) (string, error)
-	CompleteWebAuthRegister(ctx context.Context, r *http.Request) error
-	RemoveUser(ctx context.Context, id string) error
+	GetToken(ctx context.Context, code string) (*oauth2.Token, error)
+	AuthURL(state string) string
+	VerifyIdToken(ctx context.Context, token *oauth2.Token) (*oidc.IDToken, error)
 }
