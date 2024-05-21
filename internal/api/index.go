@@ -17,6 +17,6 @@ func (a *api) getIndex(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
-	r := layout.Base("Chess Tournament Tracker", page.Index(users))
+	r := layout.Base("Chess Tournament Tracker", "/", page.Index(users))
 	return r.Render(ctx, c.Response().Writer)
 }

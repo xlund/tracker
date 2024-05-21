@@ -32,7 +32,7 @@ func (a *api) getUser(c echo.Context) error {
 
 	profile := domain.UserAUthProfileFromMap(session.Values["profile"].(map[string]interface{}))
 
-	t := layout.Base("User", page.UserProfile(profile))
+	t := layout.Base("User", "/user", page.UserProfile(profile))
 
 	return t.Render(c.Request().Context(), c.Response().Writer)
 }
@@ -46,7 +46,7 @@ func (a *api) getUsers(e echo.Context) error {
 		return e.String(http.StatusInternalServerError, err.Error())
 	}
 
-	c := layout.Base("Users", page.Users(users))
+	c := layout.Base("Users", "/users", page.Users(users))
 	return c.Render(ctx, e.Response().Writer)
 
 }

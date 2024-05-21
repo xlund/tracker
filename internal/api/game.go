@@ -67,7 +67,7 @@ func (a *api) getGames(e echo.Context) error {
 		return e.String(http.StatusInternalServerError, err.Error())
 	}
 
-	c := layout.Base("Games", page.Games(games, users))
+	c := layout.Base("Games", "/games", page.Games(games, users))
 	return c.Render(ctx, e.Response().Writer)
 }
 

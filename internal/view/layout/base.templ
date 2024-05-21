@@ -1,6 +1,6 @@
 package layout
 
-templ Base(title string, children ...templ.Component) {
+templ Base(title string, slug string, children ...templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -10,8 +10,8 @@ templ Base(title string, children ...templ.Component) {
 			<script src="https://cdn.jsdelivr.net/gh/gnat/surreal@main/surreal.js"></script>
 			<link rel="stylesheet" type="text/css" href="public/css/style.css"/>
 		</head>
-		<body>
-			@siteHeader()
+		<body class="measure-60 centered">
+			@siteHeader(slug)
 			for _, child := range children {
 				@child
 			}
@@ -21,16 +21,11 @@ templ Base(title string, children ...templ.Component) {
 	</html>
 }
 
-templ siteHeader() {
-	<header class="navbar">
-		@nav()
+templ siteHeader(slug string) {
+	<header class="bottom-6">
+		<nav aria-label="Site Sections" class="columns">
+			<div class="cols-2"><a href="/" role="button" class="btn w100 black"><i class={ "nav-active-icon", templ.KV("visible", slug == "/") }></i>Home</a></div>
+			<div class="cols-2"><a href="/login" role="button" class="btn w100 black"><i class={ "nav-active-icon", templ.KV("visible", slug == "/login") }></i>Login</a></div>
+		</nav>
 	</header>
-}
-
-templ nav() {
-	<nav aria-label="Site Sections" class="columns">
-		<a href="/" role="button">Home</a>
-		<a href="/users" role="button">Users</a>
-		<a href="/games" role="button">Games</a>
-	</nav>
 }
