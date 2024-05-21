@@ -8,8 +8,7 @@ templ Base(title string, children ...templ.Component) {
 			<meta name="viewport" content="width=device-widht, inital-scale=1.0"/>
 			<title>Chess Tournament Tracker</title>
 			<script src="https://cdn.jsdelivr.net/gh/gnat/surreal@main/surreal.js"></script>
-			<link rel="stylesheet" href="https://unpkg.com/missing.css"/>
-			<link rel="stylesheet" type="text/css" href="/static/css/style.css"/>
+			<link rel="stylesheet" type="text/css" href="public/css/style.css"/>
 		</head>
 		<body>
 			@siteHeader()
@@ -29,11 +28,9 @@ templ siteHeader() {
 }
 
 templ nav() {
-	<nav aria-label="Site Sections">
-		<ul role="list">
-			<li><a href="/">Home</a></li>
-			<li><a href="/users">Users</a></li>
-			<li><a href="/games">Games</a></li>
-		</ul>
+	<nav aria-label="Site Sections" class="columns">
+		<a href="/" role="button">Home</a>
+		<a href="/users" role="button">Users</a>
+		<a href="/games" role="button">Games</a>
 	</nav>
 }

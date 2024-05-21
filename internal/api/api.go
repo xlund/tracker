@@ -3,8 +3,6 @@ package api
 import (
 	"context"
 	"encoding/gob"
-	"fmt"
-	"net/http"
 
 	"github.com/gorilla/sessions"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -12,12 +10,11 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/xlund/tracker/internal/domain"
 	"github.com/xlund/tracker/internal/repository"
+	"github.com/xlund/tracker/public"
 	"golang.org/x/oauth2"
 )
 
 type api struct {
-	httpClient *http.Client
-
 	userRepo      domain.UserRepository
 	gameRepo      domain.GameRepository
 	authenticator domain.Authenticator
@@ -26,39 +23,24 @@ type api struct {
 func NewApi(ctx context.Context, pool *pgxpool.Pool) *api {
 
 	userRepo := repository.NewPostgresUser(pool)
-
 	gameRepo := repository.NewPostgresGame(pool)
-
 	authenticator, _ := repository.NewAuth0Authenticator()
 
-	client := &http.Client{}
 	return &api{
-		httpClient:    client,
 		authenticator: authenticator,
-
-		userRepo: userRepo,
-		gameRepo: gameRepo,
+		userRepo:      userRepo,
+		gameRepo:      gameRepo,
 	}
 }
 
-func (a *api) Server(port int) *http.Server {
-	return &http.Server{
-		Addr:    fmt.Sprintf("localhost:%d", port),
-		Handler: a.Routes(),
-	}
-}
-
-func (a *api) Routes() *echo.Echo {
+func (a *api) Router() *echo.Echo {
 	e := echo.New()
-
 	// To store custom types in our cookies,
 	// we must first register them using gob.Register
 	gob.Register(map[string]interface{}{})
 	gob.Register(&oauth2.Token{})
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte("secret"))))
-
-	e.Static("/static", "js")
-	e.Static("/static", "css")
+	e.StaticFS("/public", public.Assets)
 
 	e.GET("/", a.getIndex)
 

@@ -7,7 +7,7 @@ import (
 	"os/signal"
 
 	"github.com/joho/godotenv"
-	"github.com/xlund/tracker/internal/cmd"
+	"github.com/xlund/tracker/internal/app"
 )
 
 func main() {
@@ -18,6 +18,6 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill)
 	defer cancel()
 
-	ret := cmd.Exectue(ctx)
+	ret := app.Start(ctx)
 	os.Exit(ret)
 }

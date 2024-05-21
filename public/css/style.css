@@ -1,0 +1,15 @@
+.columns {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+/* a with role button */
+a[role="button"] {
+  cursor: pointer;
+  text-decoration: none;
+  border: 0.05em solid #000;
+  border-radius: 0;
+  outline: none;
+  background: #fff;
+  box-shadow: 2px 2px #bbb;
+}
